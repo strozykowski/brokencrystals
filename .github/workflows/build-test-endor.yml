@@ -60,7 +60,7 @@ jobs:
       - name: Endor Labs Scan Pull Request
         uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
         with:
-          working-directory: code/
+          scan_path: code/
           namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
           scan_dependencies: true
           scan_secrets: true
