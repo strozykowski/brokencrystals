@@ -59,7 +59,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Endor Labs Scan Pull Request
-      if: github.event_name == 'pull_request'
       uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
       with:
         namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
@@ -80,7 +79,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 'Endor Labs Scan Push to main'
-      if: ${{ github.event_name == 'push' }}
       uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
       with:
         namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
