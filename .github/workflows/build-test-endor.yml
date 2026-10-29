@@ -2,9 +2,17 @@ name: "Build & Test BrokenCrystals for Endor Demo env"
 on:
   workflow_dispatch:
   pull_request:
+  
 jobs:
   build-test-project:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Used to upload Sarif artifact to GitHub
+      contents: read # Used to check out a private repository
+      actions: read # Required for private repositories to upload Sarif files. GitHub Advanced Security licenses are required.
+      id-token: write # Used for keyless authentication with Endor Labs
+      pull-requests: write # Required to automatically comment on PRs for new policy violations
+      issues: write # Required to comment on PRs for new policy violations
     services:
       docker:
         image: docker:dind
@@ -48,52 +56,15 @@ jobs:
         working-directory: code/
         run: |
           npm sbom --sbom-format=cyclonedx > sbom.json
-  scan:
-    needs: build-test-project
-    permissions:
-      security-events: write # Used to upload Sarif artifact to GitHub
-      contents: read # Used to check out a private repository
-      actions: read # Required for private repositories to upload Sarif files. GitHub Advanced Security licenses are required.
-      id-token: write # Used for keyless authentication with Endor Labs
-      pull-requests: write # Required to automatically comment on PRs for new policy violations
-      issues: write # Required to comment on PRs for new policy violations
-    runs-on: ubuntu-latest
-    steps:
-    - name: Endor Labs Scan Pull Request
-      uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
-      with:
-        namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
-        scan_dependencies: true
-        scan_secrets: true
-        pr: false
-        github_token: ${{ secrets.GITHUB_TOKEN }} # Requi
-        api_key: ${{ secrets.ENDOR_API_CREDENTIALS_KEY }}
-        api_secret: ${{ secrets.ENDOR_API_CREDENTIALS_SECRET }}
-        enable_github_action_token: false
-
-  scan-main:
-    needs: build-test-project
-    permissions:
-      id-token: write
-      repository-projects: read
-      pull-requests: read
-      contents: read
-    name: endorctl-scan
-    runs-on: ubuntu-latest
-    steps:
-    - name: 'Endor Labs Scan Push to main'
-      uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
-      with:
-        namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
-        scan_dependencies: true
-        scan_secrets: true
-        pr: false
-        scan_summary_output_type: 'table'
-        sarif_file: 'findings.sarif'
-        api_key: ${{ secrets.ENDOR_API_CREDENTIALS_KEY }}
-        api_secret: ${{ secrets.ENDOR_API_CREDENTIALS_SECRET }}
-        enable_github_action_token: false
-    - name: Upload findings to github
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: 'findings.sarif'
+          
+      - name: Endor Labs Scan Pull Request
+        uses: endorlabs/github-action@b8992820cc4d9c9e7ded5022adf6cabe2dc11946 # v1.1.12
+        with:
+          namespace: 'ben-demo' # Replace with your Endor Labs tenant namespace
+          scan_dependencies: true
+          scan_secrets: true
+          pr: false
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Requi
+          api_key: ${{ secrets.ENDOR_API_CREDENTIALS_KEY }}
+          api_secret: ${{ secrets.ENDOR_API_CREDENTIALS_SECRET }}
+          enable_github_action_token: false
